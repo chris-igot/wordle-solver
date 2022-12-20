@@ -9,13 +9,26 @@ export enum Marks {
     EXACT,
 }
 
+const generate2DArray = (rows: number, cols: number) => {
+    const output: Marks[][] = [];
+
+    for (let row = 0; row < rows; row++) {
+        output.push(Array(5).fill(Marks.UNMARKED));
+        // for (let col = 0; col < cols; col++) {
+
+        // }
+    }
+
+    return output;
+};
+
 function useSolver() {
     const [words, setWords] = useState<string[]>([]);
     const [wordsUsed, setWordsUsed] = useState<string[]>([]);
     const [positions, setPositions] = useState<{
         [index: string]: number | Set<number>;
     }>({});
-    const [marks, setMarks] = useState<Marks[][]>([]);
+    const [marks, setMarks] = useState<Marks[][]>(generate2DArray(ROWS, COLS));
     const [ready, setReady] = useState(false);
 
     useEffect(() => {
@@ -39,8 +52,12 @@ function useSolver() {
             .catch((err) => console.log(err));
     }, []);
 
+    useEffect(() => {
+        console.log(positions);
+    }, [positions]);
+
     const reset = () => {
-        setMarks(Array(6).fill(Array(5).fill(Marks.UNMARKED)));
+        setMarks(generate2DArray(ROWS, COLS));
         setWordsUsed([]);
         setPositions({});
     };
@@ -63,29 +80,38 @@ function useSolver() {
     };
 
     const removeWord = (word: string) => {
-        const index = wordsUsed.indexOf(word);
+        const row = wordsUsed.indexOf(word);
 
-        if (index >= 0) {
+        if (row >= 0) {
             const newWordsUsed = [...wordsUsed];
 
-            newWordsUsed.splice(index, 1);
+            newWordsUsed.splice(row, 1);
             setWordsUsed(newWordsUsed);
             updatePositions();
         }
 
-        return index;
+        return row;
+    };
+
+    const updateWord = (newWord: string, row: number) => {
+        const newWordsUsed = [...wordsUsed];
+
+        if (row < newWordsUsed.length) {
+            newWordsUsed[row] = newWord;
+        }
     };
 
     const updatePositions = () => {
         const newPositions = { ...positions };
 
-        for (let row = 0; row < ROWS; row++) {
+        for (let row = 0; row < wordsUsed.length; row++) {
             for (let col = 0; col < COLS; col++) {
                 switch (marks[row][col]) {
                     case Marks.EXACT:
                         newPositions[wordsUsed[row].at(col) as string] = col;
                         break;
                     case Marks.NOT_HERE:
+                        // console.log('99', wordsUsed[row], col);
                         if (newPositions[wordsUsed[row].at(col) as string]) {
                             (
                                 newPositions[
@@ -96,6 +122,9 @@ function useSolver() {
                             newPositions[wordsUsed[row].at(col) as string] =
                                 new Set([col]);
                         }
+                        break;
+                    case Marks.UNMARKED:
+                        delete newPositions[wordsUsed[row].at(col) as string];
                         break;
                     default:
                         break;
@@ -109,38 +138,40 @@ function useSolver() {
     const findWords = () => {
         const matches: string[] = [];
 
-        for (let row = 0; row < words.length; row++) {
-            const word = words[row];
-            let found = true;
+        if (Object.keys(positions).length > 0) {
+            for (let row = 0; row < words.length; row++) {
+                const word = words[row];
+                let found = true;
 
-            for (let col = 0; col < COLS; col++) {
-                const letter = word.at(col) as string;
+                for (let col = 0; col < COLS; col++) {
+                    const letter = word.at(col) as string;
 
-                if (letter in positions) {
-                    const posData = positions[letter];
+                    if (letter in positions) {
+                        const posData = positions[letter];
 
-                    if (typeof posData === 'number') {
-                        if (posData !== col) {
-                            found = false;
-                            break;
+                        if (typeof posData === 'number') {
+                            if (posData !== col) {
+                                found = false;
+                                break;
+                            }
+                        } else {
+                            if (posData.has(col)) {
+                                found = false;
+                                break;
+                            }
                         }
                     } else {
-                        if (posData.has(col)) {
-                            found = false;
-                            break;
-                        }
+                        found = false;
+                        break;
                     }
-                } else {
-                    found = false;
-                    break;
+                }
+
+                if (found) {
+                    matches.push(word);
                 }
             }
-
-            if (found) {
-                matches.push(word);
-            }
         }
-
+        console.log(matches, Object.keys(positions).length);
         return matches;
     };
 
@@ -152,6 +183,7 @@ function useSolver() {
         markLetter,
         addWord,
         removeWord,
+        updateWord,
         findWords,
     };
 }
