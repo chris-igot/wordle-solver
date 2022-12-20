@@ -15,8 +15,8 @@ function App() {
         <div className="App">
             <div>
                 <form action="" method="get">
-                    <Word index={0} />
-                    <Word word="fluke" index={1} />
+                    <Word row={0} />
+                    <Word word="fluke" row={1} />
                 </form>
             </div>
         </div>

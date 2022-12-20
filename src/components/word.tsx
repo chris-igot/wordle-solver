@@ -1,14 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { COLS } from '../solver';
 import { TextField } from '@mui/material';
 
 export interface PropsType {
     word?: string;
-    index?: number;
+    row?: number;
+    updateWord?: (word: string) => void;
 }
 
 function Word(props: PropsType) {
-    const indexStart = (props.index ? COLS * props.index : 0) + 1;
+    const indexStart = (props.row ? COLS * props.row : 0) + 1;
+    const textArray = props.word ? props.word.split('') : Array(COLS).fill(' ');
+
+    const lettersRef = useRef(null);
+    const [word, setWord] = useState<string>(
+        props.word ? props.word : ' '.repeat(COLS)
+    );
+
+    useEffect(() => {
+        console.log(word);
+    }, [word]);
 
     const focusNext = (index: number) => {
         const element = document.getElementById(
@@ -20,61 +31,51 @@ function Word(props: PropsType) {
             (document.getElementById('letter-1') as HTMLInputElement).focus();
         }
     };
+
+    const changeValue = (index: number, newValue: string) => {
+        const wordArr = word.split('');
+        wordArr[index] = newValue;
+        const newWord = wordArr.join('');
+        if (props.updateWord) {
+            props.updateWord(newWord);
+        }
+        setWord(newWord);
+    };
+
     return (
-        <div>
-            {props.word
-                ? props.word.split('').map((letter: string, index: number) => {
-                      return (
-                          <TextField
-                              key={index}
-                              defaultValue={letter.toUpperCase()}
-                              inputProps={{
-                                  id: 'letter-' + (indexStart + index),
-                                  tabIndex: indexStart + index,
-                                  maxLength: 1,
-                                  style: { textAlign: 'center' },
-                                  onChange: (e) => {
-                                      focusNext(indexStart + index + 1);
-                                  },
-                                  onFocus: (e) => {
-                                      e.target.select();
-                                  },
-                              }}
-                              sx={{
-                                  margin: '0.25rem',
-                                  width: '3.5rem',
-                                  height: '3.4rem',
-                              }}
-                          />
-                      );
-                  })
-                : Array(COLS)
-                      .fill('')
-                      .map((letter: string, index: number) => {
-                          return (
-                              <TextField
-                                  key={index}
-                                  defaultValue={letter}
-                                  inputProps={{
-                                      id: 'letter-' + (indexStart + index),
-                                      tabIndex: indexStart + index,
-                                      maxLength: 1,
-                                      style: { textAlign: 'center' },
-                                      onChange: (e) => {
-                                          focusNext(indexStart + index + 1);
-                                      },
-                                      onFocus: (e) => {
-                                          e.target.select();
-                                      },
-                                  }}
-                                  sx={{
-                                      margin: '0.25rem',
-                                      width: '3.5rem',
-                                      height: '3.4rem',
-                                  }}
-                              />
-                          );
-                      })}
+        <div ref={lettersRef}>
+            {textArray.map((letter: string, col: number) => {
+                return (
+                    <TextField
+                        key={col}
+                        defaultValue={letter.toUpperCase()}
+                        inputProps={{
+                            id: 'letter-' + (indexStart + col),
+                            tabIndex: indexStart + col,
+                            maxLength: 1,
+                            style: {
+                                textAlign: 'center',
+                                textTransform: 'uppercase',
+                            },
+                            onChange: (e) => {
+                                changeValue(
+                                    col,
+                                    (e.target as HTMLInputElement).value
+                                );
+                                focusNext(indexStart + col + 1);
+                            },
+                            onFocus: (e) => {
+                                e.target.select();
+                            },
+                        }}
+                        sx={{
+                            margin: '0.25rem',
+                            width: '3.5rem',
+                            height: '3.4rem',
+                        }}
+                    />
+                );
+            })}
         </div>
     );
 }
