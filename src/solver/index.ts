@@ -1,7 +1,7 @@
 export const ROWS = 6;
 export const COLS = 5;
 
-enum Marks {
+export enum Marks {
     UNMARKED,
     NOT_HERE,
     EXACT,

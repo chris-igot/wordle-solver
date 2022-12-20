@@ -1,25 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { COLS } from '../solver';
+import { COLS, Marks } from '../solver';
 import { TextField } from '@mui/material';
 
 export interface PropsType {
-    word?: string;
-    row?: number;
-    updateWord?: (word: string) => void;
+    row: number;
+    word: string;
+    updateWord: (word: string) => void;
+    letterStates: Marks[];
+    toggleLetterState: (row: number, col: number) => void;
 }
 
 function Word(props: PropsType) {
     const indexStart = (props.row ? COLS * props.row : 0) + 1;
     const textArray = props.word ? props.word.split('') : Array(COLS).fill(' ');
-
-    const lettersRef = useRef(null);
-    const [word, setWord] = useState<string>(
-        props.word ? props.word : ' '.repeat(COLS)
-    );
-
-    useEffect(() => {
-        console.log(word);
-    }, [word]);
 
     const focusNext = (index: number) => {
         const element = document.getElementById(
@@ -32,23 +25,20 @@ function Word(props: PropsType) {
         }
     };
 
-    const changeValue = (index: number, newValue: string) => {
-        const wordArr = word.split('');
+    const updateWord = (index: number, newValue: string) => {
+        const wordArr = [...textArray];
         wordArr[index] = newValue;
         const newWord = wordArr.join('');
-        if (props.updateWord) {
-            props.updateWord(newWord);
-        }
-        setWord(newWord);
+        props.updateWord(newWord);
     };
 
     return (
-        <div ref={lettersRef}>
+        <div>
             {textArray.map((letter: string, col: number) => {
                 return (
                     <TextField
                         key={col}
-                        defaultValue={letter.toUpperCase()}
+                        value={letter.toUpperCase()}
                         inputProps={{
                             id: 'letter-' + (indexStart + col),
                             tabIndex: indexStart + col,
@@ -57,15 +47,19 @@ function Word(props: PropsType) {
                                 textAlign: 'center',
                                 textTransform: 'uppercase',
                             },
-                            onChange: (e) => {
-                                changeValue(
-                                    col,
-                                    (e.target as HTMLInputElement).value
-                                );
-                                focusNext(indexStart + col + 1);
+                            onKeyUp: (e) => {
+                                console.log(e.key);
+                                if (e.key.length === 1) {
+                                    updateWord(col, e.key);
+                                    focusNext(indexStart + col + 1);
+                                }
                             },
                             onFocus: (e) => {
                                 e.target.select();
+                            },
+                            onClick: (e) => {
+                                const row = props.row ? props.row : 0;
+                                props.toggleLetterState(row, col);
                             },
                         }}
                         sx={{

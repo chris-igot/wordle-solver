@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import Solver from './solver';
+import Solver, { COLS, Marks } from './solver';
 import Word from './components/word';
 
 function App() {
@@ -14,9 +14,21 @@ function App() {
     return (
         <div className="App">
             <div>
-                <form action="" method="get">
-                    <Word row={0} />
-                    <Word word="fluke" row={1} />
+                <form>
+                    <Word
+                        word="     "
+                        row={0}
+                        letterStates={Array(COLS).fill(Marks.UNMARKED)}
+                        updateWord={() => {}}
+                        toggleLetterState={() => {}}
+                    />
+                    <Word
+                        word="fluke"
+                        row={1}
+                        letterStates={Array(COLS).fill(Marks.UNMARKED)}
+                        updateWord={() => {}}
+                        toggleLetterState={() => {}}
+                    />
                 </form>
             </div>
         </div>
