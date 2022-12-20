@@ -10,13 +10,13 @@ export enum Marks {
 }
 
 function useSolver() {
-    const [_words, set_words] = useState<string[]>([]);
-    const [_wordsUsed, set_wordsUsed] = useState<string[]>([]);
-    const [_positions, set_positions] = useState<{
+    const [words, setWords] = useState<string[]>([]);
+    const [wordsUsed, setWordsUsed] = useState<string[]>([]);
+    const [positions, setPositions] = useState<{
         [index: string]: number | Set<number>;
     }>({});
-    const [_marks, set_marks] = useState<Marks[][]>([]);
-    const [_ready, set_ready] = useState(false);
+    const [marks, setMarks] = useState<Marks[][]>([]);
+    const [ready, setReady] = useState(false);
 
     useEffect(() => {
         fetch('./dictionary.txt', { method: 'get' })
@@ -33,43 +33,43 @@ function useSolver() {
                     words.push(word);
                 }
 
-                set_ready(true);
-                set_words(words);
+                setReady(true);
+                setWords(words);
             })
             .catch((err) => console.log(err));
     }, []);
 
     const reset = () => {
-        set_marks(Array(6).fill(Array(5).fill(Marks.UNMARKED)));
-        set_wordsUsed([]);
-        set_positions({});
+        setMarks(Array(6).fill(Array(5).fill(Marks.UNMARKED)));
+        setWordsUsed([]);
+        setPositions({});
     };
 
     const markLetter = (mark: Marks, row: number, col: number) => {
-        const newMarks = { ..._marks };
+        const newMarks = { ...marks };
 
         newMarks[row][col] = mark;
 
-        set_marks(newMarks);
+        setMarks(newMarks);
         updatePositions();
     };
 
     const addWord = (word: string) => {
-        const newWordsUsed = [..._wordsUsed];
+        const newWordsUsed = [...wordsUsed];
 
         newWordsUsed.push(word);
-        set_wordsUsed(newWordsUsed);
+        setWordsUsed(newWordsUsed);
         updatePositions();
     };
 
     const removeWord = (word: string) => {
-        const index = _wordsUsed.indexOf(word);
+        const index = wordsUsed.indexOf(word);
 
         if (index >= 0) {
-            const newWordsUsed = [..._wordsUsed];
+            const newWordsUsed = [...wordsUsed];
 
             newWordsUsed.splice(index, 1);
-            set_wordsUsed(newWordsUsed);
+            setWordsUsed(newWordsUsed);
             updatePositions();
         }
 
@@ -77,23 +77,23 @@ function useSolver() {
     };
 
     const updatePositions = () => {
-        const newPositions = { ..._positions };
+        const newPositions = { ...positions };
 
         for (let row = 0; row < ROWS; row++) {
             for (let col = 0; col < COLS; col++) {
-                switch (_marks[row][col]) {
+                switch (marks[row][col]) {
                     case Marks.EXACT:
-                        newPositions[_wordsUsed[row].at(col) as string] = col;
+                        newPositions[wordsUsed[row].at(col) as string] = col;
                         break;
                     case Marks.NOT_HERE:
-                        if (newPositions[_wordsUsed[row].at(col) as string]) {
+                        if (newPositions[wordsUsed[row].at(col) as string]) {
                             (
                                 newPositions[
-                                    _wordsUsed[row].at(col) as string
+                                    wordsUsed[row].at(col) as string
                                 ] as Set<number>
                             ).add(col);
                         } else {
-                            newPositions[_wordsUsed[row].at(col) as string] =
+                            newPositions[wordsUsed[row].at(col) as string] =
                                 new Set([col]);
                         }
                         break;
@@ -103,21 +103,21 @@ function useSolver() {
             }
         }
 
-        set_positions(newPositions);
+        setPositions(newPositions);
     };
 
     const findWords = () => {
         const matches: string[] = [];
 
-        for (let row = 0; row < _words.length; row++) {
-            const word = _words[row];
+        for (let row = 0; row < words.length; row++) {
+            const word = words[row];
             let found = true;
 
             for (let col = 0; col < COLS; col++) {
                 const letter = word.at(col) as string;
 
-                if (letter in _positions) {
-                    const posData = _positions[letter];
+                if (letter in positions) {
+                    const posData = positions[letter];
 
                     if (typeof posData === 'number') {
                         if (posData !== col) {
@@ -144,7 +144,16 @@ function useSolver() {
         return matches;
     };
 
-    return { ready: _ready, reset, markLetter, addWord, removeWord, findWords };
+    return {
+        ready,
+        wordsUsed,
+        marks,
+        reset,
+        markLetter,
+        addWord,
+        removeWord,
+        findWords,
+    };
 }
 
 export default useSolver;
