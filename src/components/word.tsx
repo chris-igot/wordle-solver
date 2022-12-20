@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { COLS, Marks } from '../solver';
+import { COLS, Marks } from '../hooks/useSolver';
 import { TextField } from '@mui/material';
 
 export interface PropsType {

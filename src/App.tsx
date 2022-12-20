@@ -1,14 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import Solver, { COLS, Marks } from './solver';
+import { COLS, Marks } from './hooks/useSolver';
 import Word from './components/word';
 
 function App() {
-    const solver = useRef(new Solver('./dictionary.txt'));
+    // const solver = useRef(new Solver('./dictionary.txt'));
 
     useEffect(() => {
-        solver.current.loadDictionary();
+        // solver.current.loadDictionary();
     }, []);
 
     return (
