@@ -8,23 +8,27 @@ enum Marks {
 }
 
 export default class Solver {
-    private words: string[] = [];
-    private wordsUsed: string[] = [];
-    private positions: { [index: string]: number | Set<number> } = {};
-    private marks: Marks[][];
-    private ok = false;
+    private _words: string[] = [];
+    private _wordsUsed: string[] = [];
+    private _positions: { [index: string]: number | Set<number> } = {};
+    private _marks: Marks[][];
+    private _ready = false;
     constructor(filename: string) {
-        this.marks = Array(ROWS).fill(Array(COLS).fill(Marks.UNMARKED));
+        this._marks = Array(ROWS).fill(Array(COLS).fill(Marks.UNMARKED));
     }
 
     get ready() {
-        return this.ok;
+        return this._ready;
+    }
+
+    get wordsUsed() {
+        return this._wordsUsed;
     }
 
     reset() {
-        this.marks = Array(6).fill(Array(5).fill(Marks.UNMARKED));
-        this.wordsUsed = [];
-        this.positions = {};
+        this._marks = Array(6).fill(Array(5).fill(Marks.UNMARKED));
+        this._wordsUsed = [];
+        this._positions = {};
     }
 
     async loadDictionary() {
@@ -36,36 +40,36 @@ export default class Solver {
             })
             .then((data) => {
                 console.log('data', data.length);
-                this.words = [];
+                this._words = [];
 
                 for (let i = 0; i < data.length; i += 6) {
                     const word = data.substring(i, i + 6).trim();
 
-                    this.words.push(word);
+                    this._words.push(word);
                 }
 
-                this.ok = true;
+                this._ready = true;
             })
             .catch((err) => console.log(err));
 
-        this.words = words;
+        this._words = words;
     }
 
     markLetter(mark: Marks, row: number, col: number) {
-        this.marks[row][col] = mark;
+        this._marks[row][col] = mark;
         this.updatePositions();
     }
 
     addWord(word: string) {
-        this.wordsUsed.push(word.toUpperCase());
+        this._wordsUsed.push(word.toUpperCase());
         this.updatePositions();
     }
 
     removeWord(word: string) {
-        const index = this.wordsUsed.indexOf(word);
+        const index = this._wordsUsed.indexOf(word);
 
         if (index >= 0) {
-            this.wordsUsed.splice(index, 1);
+            this._wordsUsed.splice(index, 1);
         }
         this.updatePositions();
 
@@ -75,25 +79,26 @@ export default class Solver {
     private updatePositions() {
         for (let row = 0; row < ROWS; row++) {
             for (let col = 0; col < COLS; col++) {
-                switch (this.marks[row][col]) {
+                switch (this._marks[row][col]) {
                     case Marks.EXACT:
-                        this.positions[this.wordsUsed[row].at(col) as string] =
-                            col;
+                        this._positions[
+                            this._wordsUsed[row].at(col) as string
+                        ] = col;
                         break;
                     case Marks.NOT_HERE:
                         if (
-                            this.positions[
-                                this.wordsUsed[row].at(col) as string
+                            this._positions[
+                                this._wordsUsed[row].at(col) as string
                             ]
                         ) {
                             (
-                                this.positions[
-                                    this.wordsUsed[row].at(col) as string
+                                this._positions[
+                                    this._wordsUsed[row].at(col) as string
                                 ] as Set<number>
                             ).add(col);
                         } else {
-                            this.positions[
-                                this.wordsUsed[row].at(col) as string
+                            this._positions[
+                                this._wordsUsed[row].at(col) as string
                             ] = new Set([col]);
                         }
                         break;
@@ -107,15 +112,15 @@ export default class Solver {
     findWords() {
         const matches: string[] = [];
 
-        for (let row = 0; row < this.words.length; row++) {
-            const word = this.words[row];
+        for (let row = 0; row < this._words.length; row++) {
+            const word = this._words[row];
             let found = true;
 
             for (let col = 0; col < COLS; col++) {
                 const letter = word.at(col) as string;
 
-                if (letter in this.positions) {
-                    const posData = this.positions[letter];
+                if (letter in this._positions) {
+                    const posData = this._positions[letter];
 
                     if (typeof posData === 'number') {
                         if (posData !== col) {
