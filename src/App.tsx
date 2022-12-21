@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import useSolver, { COLS, Marks } from './hooks/useSolver';
 import Word from './components/word';
 import { TextField } from '@mui/material';
 
 function App() {
     const solver = useSolver();
+
+    useEffect(() => {
+        solver.findWords();
+        console.log('foundWords triggered', solver.wordsUsed);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [solver.positions, solver.wordsUsed]);
 
     const toggle = (row: number, col: number) => {
         switch (solver.marks[row][col]) {
@@ -54,7 +60,7 @@ function App() {
                 </form>
 
                 <div>
-                    {solver.findWords().map((word, index) => (
+                    {solver.results.map((word, index) => (
                         <div key={index}>{word}</div>
                     ))}
                 </div>

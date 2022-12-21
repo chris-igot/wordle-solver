@@ -27,6 +27,7 @@ function useSolver() {
     }>({});
     const [marks, setMarks] = useState<Marks[][]>(generate2DArray(ROWS, COLS));
     const [ready, setReady] = useState(false);
+    const [results, setResults] = useState<string[]>([]);
 
     useEffect(() => {
         fetch('./dictionary.txt', { method: 'get' })
@@ -48,6 +49,11 @@ function useSolver() {
             .catch((err) => console.log(err));
     }, []);
 
+    useEffect(() => {
+        updatePositions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [marks, wordsUsed]);
+
     const reset = () => {
         setMarks(generate2DArray(ROWS, COLS));
         setWordsUsed([]);
@@ -60,7 +66,6 @@ function useSolver() {
         newMarks[row][col] = mark;
 
         setMarks(newMarks);
-        updatePositions();
     };
 
     const addWord = (word: string) => {
@@ -68,7 +73,6 @@ function useSolver() {
 
         newWordsUsed.push(word.toUpperCase());
         setWordsUsed(newWordsUsed);
-        updatePositions();
     };
 
     const removeWord = (word: string) => {
@@ -79,7 +83,6 @@ function useSolver() {
 
             newWordsUsed.splice(row, 1);
             setWordsUsed(newWordsUsed);
-            updatePositions();
         }
 
         return row;
@@ -183,6 +186,7 @@ function useSolver() {
             }
         }
 
+        setResults(matches);
         return matches;
     };
 
@@ -190,12 +194,14 @@ function useSolver() {
         ready,
         wordsUsed,
         marks,
+        positions,
         reset,
         markLetter,
         addWord,
         removeWord,
         updateWord,
         findWords,
+        results,
     };
 }
 
