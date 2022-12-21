@@ -49,7 +49,7 @@ function Word(props: PropsType) {
 
         wordArr[index] = newValue;
         const newWord = wordArr.join('');
-        console.log({ newWord }, props.row);
+
         props.updateWord(newWord, props.row);
     };
 

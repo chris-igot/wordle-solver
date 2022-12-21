@@ -76,7 +76,7 @@ function useSolver() {
     };
 
     const removeWord = (word: string) => {
-        const row = wordsUsed.indexOf(word);
+        const row = wordsUsed.indexOf(word.toUpperCase());
 
         if (row >= 0) {
             const newWordsUsed = [...wordsUsed];
@@ -94,7 +94,7 @@ function useSolver() {
         if (row < newWordsUsed.length) {
             newWordsUsed[row] = newWord.toUpperCase();
         }
-        console.log('update word');
+
         setWordsUsed(newWordsUsed);
     };
 

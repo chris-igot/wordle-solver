@@ -12,10 +12,16 @@
     justify-content: center;
     margin: 0.5rem;
     padding: 1rem;
+    min-width: 300px;
+    grid-template-columns: 100%;
 }
 
 .words-used {
     margin-top: 0.5rem;
+}
+
+.controls {
+    margin-block: 0.25rem;
 }
 
 .content > form {

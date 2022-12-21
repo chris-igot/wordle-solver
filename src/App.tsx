@@ -1,8 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import useSolver, { COLS, Marks } from './hooks/useSolver';
 import Word from './components/word';
 import {
+    Box,
+    Button,
+    ButtonGroup,
+    Divider,
+    List,
+    ListItem,
     Paper,
     Table,
     TableBody,
@@ -12,13 +18,15 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
+import { DeleteForever } from '@mui/icons-material';
 
 function App() {
     const solver = useSolver();
 
+    const [edit, setEdit] = useState(false);
+
     useEffect(() => {
         solver.findWords();
-        console.log('foundWords triggered', solver.wordsUsed);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [solver.positions, solver.wordsUsed]);
 
@@ -43,7 +51,8 @@ function App() {
         ) as HTMLInputElement;
 
         if (element.value.length === COLS) {
-            solver.addWord(element.value.trim());
+            const word = element.value.trim();
+            solver.addWord(word);
             element.value = '';
         }
     };
@@ -55,9 +64,55 @@ function App() {
                     Wordle Solver
                 </Typography>
 
-                <div id="words-used" className="words-used">
-                    {solver.wordsUsed.map((word, row) => {
-                        return (
+                {edit && (
+                    <Box>
+                        <List>
+                            <Divider />
+                            {solver.wordsUsed.map((word, row) => (
+                                <React.Fragment key={row}>
+                                    <ListItem>
+                                        <TextField
+                                            defaultValue={word}
+                                            inputProps={{
+                                                maxLength: COLS,
+                                                onKeyUp: (e) => {
+                                                    const word =
+                                                        e.currentTarget.value;
+
+                                                    if (
+                                                        e.key === 'Enter' &&
+                                                        word.length === COLS
+                                                    ) {
+                                                        solver.updateWord(
+                                                            word,
+                                                            row
+                                                        );
+                                                    }
+                                                },
+                                            }}
+                                        />
+
+                                        <DeleteForever
+                                            color="error"
+                                            onClick={() => {
+                                                solver.removeWord(word);
+                                            }}
+                                            sx={{
+                                                marginInlineStart: '1rem',
+                                                float: 'right',
+                                            }}
+                                        />
+                                    </ListItem>
+                                    <Divider />
+                                </React.Fragment>
+                            ))}
+                        </List>
+                    </Box>
+                )}
+
+                {!edit && (
+                    <div id="words-used" className="words-used">
+                        {solver.wordsUsed.map((word, row) => (
                             <Word
                                 key={row}
                                 row={row}
@@ -66,9 +121,29 @@ function App() {
                                 letterStates={solver.marks[row]}
                                 toggleLetterState={toggle}
                             />
-                        );
-                    })}
-                </div>
+                        ))}
+                    </div>
+                )}
+
+                {solver.wordsUsed.length > 0 && (
+                    <ButtonGroup
+                        variant="outlined"
+                        className="controls"
+                        fullWidth={true}
+                    >
+                        <Button
+                            color="warning"
+                            onClick={() => {
+                                solver.reset();
+                            }}
+                        >
+                            Reset
+                        </Button>
+                        <Button color="primary" onClick={() => setEdit(!edit)}>
+                            {edit ? 'Normal Mode' : 'Edit Mode'}
+                        </Button>
+                    </ButtonGroup>
+                )}
                 <form onSubmit={submitHandler}>
                     <TextField
                         id="word-input"
