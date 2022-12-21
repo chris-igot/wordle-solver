@@ -6,9 +6,12 @@ import {
     Box,
     Button,
     ButtonGroup,
+    Collapse,
     Divider,
+    Grow,
     List,
     ListItem,
+    ListItemText,
     Paper,
     Snackbar,
     Table,
@@ -20,6 +23,7 @@ import {
     Typography,
 } from '@mui/material';
 import { DeleteForever } from '@mui/icons-material';
+import { TransitionGroup } from 'react-transition-group';
 
 function App() {
     const solver = useSolver();
@@ -67,130 +71,160 @@ function App() {
 
     return (
         <div className="App">
-            <Paper className="content" elevation={3}>
-                <Typography variant="h4" className="title">
-                    Wordle Solver
-                </Typography>
+            <Grow in={true} appear={true}>
+                <Paper className="content" elevation={3}>
+                    <Typography variant="h4" className="title">
+                        Wordle Solver
+                    </Typography>
 
-                {edit && (
-                    <Box>
-                        <List>
-                            <Divider />
-                            {solver.wordsUsed.map((word, row) => (
-                                <React.Fragment key={row}>
-                                    <ListItem>
-                                        <TextField
-                                            defaultValue={word}
-                                            inputProps={{
-                                                maxLength: COLS,
-                                                onKeyUp: (e) => {
-                                                    const newWord =
-                                                        e.currentTarget.value.toUpperCase();
+                    <Collapse in={edit}>
+                        <Box>
+                            <List>
+                                <Divider />
+                                {solver.wordsUsed.map((word, row) => (
+                                    <React.Fragment key={row}>
+                                        <ListItem>
+                                            <TextField
+                                                defaultValue={word}
+                                                inputProps={{
+                                                    maxLength: COLS,
+                                                    onKeyUp: (e) => {
+                                                        const newWord =
+                                                            e.currentTarget.value.toUpperCase();
 
-                                                    if (
-                                                        e.key === 'Enter' &&
-                                                        newWord.length === COLS
-                                                    ) {
-                                                        solver.updateWord(
-                                                            newWord,
-                                                            row
-                                                        );
+                                                        if (
+                                                            e.key === 'Enter' &&
+                                                            newWord.length ===
+                                                                COLS
+                                                        ) {
+                                                            solver.updateWord(
+                                                                newWord,
+                                                                row
+                                                            );
 
-                                                        activateSnakeBar(
-                                                            `${word} has been changed to ${newWord}`
-                                                        );
-                                                        e.currentTarget.value =
-                                                            newWord;
-                                                    }
-                                                },
-                                            }}
+                                                            activateSnakeBar(
+                                                                `${word} has been changed to ${newWord}`
+                                                            );
+                                                            e.currentTarget.value =
+                                                                newWord;
+                                                        }
+                                                    },
+                                                }}
+                                            />
+
+                                            <DeleteForever
+                                                color="error"
+                                                onClick={() => {
+                                                    solver.removeWord(word);
+                                                }}
+                                                sx={{
+                                                    marginInlineStart: '1rem',
+                                                    float: 'right',
+                                                }}
+                                            />
+                                        </ListItem>
+                                        <Divider />
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        </Box>
+                    </Collapse>
+
+                    <Collapse in={!edit}>
+                        <div id="words-used" className="words-used">
+                            <TransitionGroup>
+                                {solver.wordsUsed.map((word, row) => (
+                                    <Collapse key={row}>
+                                        <Word
+                                            row={row}
+                                            word={word}
+                                            updateWord={solver.updateWord}
+                                            letterStates={solver.marks[row]}
+                                            toggleLetterState={toggle}
                                         />
+                                    </Collapse>
+                                ))}
+                            </TransitionGroup>
+                        </div>
+                    </Collapse>
 
-                                        <DeleteForever
-                                            color="error"
-                                            onClick={() => {
-                                                solver.removeWord(word);
-                                            }}
-                                            sx={{
-                                                marginInlineStart: '1rem',
-                                                float: 'right',
-                                            }}
-                                        />
-                                    </ListItem>
-                                    <Divider />
-                                </React.Fragment>
-                            ))}
-                        </List>
-                    </Box>
-                )}
-
-                {!edit && (
-                    <div id="words-used" className="words-used">
-                        {solver.wordsUsed.map((word, row) => (
-                            <Word
-                                key={row}
-                                row={row}
-                                word={word}
-                                updateWord={solver.updateWord}
-                                letterStates={solver.marks[row]}
-                                toggleLetterState={toggle}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {solver.wordsUsed.length > 0 && (
-                    <ButtonGroup
-                        variant="outlined"
-                        className="controls"
-                        fullWidth={true}
-                    >
-                        <Button
-                            color="warning"
-                            onClick={() => {
-                                solver.reset();
-                            }}
+                    {solver.wordsUsed.length > 0 && (
+                        <ButtonGroup
+                            variant="outlined"
+                            className="controls"
+                            fullWidth={true}
                         >
-                            Reset
-                        </Button>
-                        <Button color="primary" onClick={() => setEdit(!edit)}>
-                            {edit ? 'Normal Mode' : 'Edit Mode'}
-                        </Button>
-                    </ButtonGroup>
-                )}
-                <form onSubmit={submitHandler}>
-                    <TextField
-                        id="word-input"
-                        className="word-input"
-                        placeholder="add word"
-                    />
-                </form>
+                            <Button
+                                color="warning"
+                                onClick={() => {
+                                    solver.reset();
+                                    setEdit(false);
+                                }}
+                            >
+                                Reset
+                            </Button>
+                            <Button
+                                color="primary"
+                                onClick={() => setEdit(!edit)}
+                            >
+                                {edit ? 'Normal Mode' : 'Edit Mode'}
+                            </Button>
+                        </ButtonGroup>
+                    )}
 
-                <Typography className="divider" variant="caption">
-                    {solver.results.length > 0 ? 'results' : 'no results'}
-                </Typography>
+                    <Collapse in={!edit}>
+                        <form onSubmit={submitHandler}>
+                            <TextField
+                                id="word-input"
+                                className="word-input"
+                                placeholder="add word"
+                                inputProps={{
+                                    maxLength: COLS,
+                                    style: {
+                                        textAlign: 'center',
+                                        fontWeight: 900,
+                                        textTransform: 'uppercase',
+                                    },
+                                }}
+                            />
+                        </form>
 
-                <TableContainer className="results" component={Paper}>
-                    <Table sx={{}} aria-label="simple table">
-                        <TableBody>
-                            {solver.results.map((word, index) => (
-                                <TableRow
-                                    key={index}
-                                    sx={{
-                                        '&:last-child td, &:last-child th': {
-                                            border: 0,
-                                        },
-                                    }}
-                                >
-                                    <TableCell component="th" scope="row">
-                                        {word}
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Paper>
+                        <Typography className="divider" variant="caption">
+                            {solver.results.length > 0
+                                ? 'results'
+                                : 'no results'}
+                        </Typography>
+
+                        <Box className="results">
+                            <List>
+                                {solver.results.length > 0 && <Divider />}
+                                <TransitionGroup>
+                                    {solver.results
+                                        .slice(0, 20)
+                                        .map((word, index) => (
+                                            <Collapse key={index}>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary={word}
+                                                    />
+                                                </ListItem>
+                                                <Divider />
+                                            </Collapse>
+                                        ))}
+                                </TransitionGroup>
+                                {solver.results.length > 20 && (
+                                    <Typography
+                                        className="divider"
+                                        variant="caption"
+                                    >
+                                        maximum of 20 results shown
+                                    </Typography>
+                                )}
+                            </List>
+                        </Box>
+                    </Collapse>
+                </Paper>
+            </Grow>
 
             <Snackbar
                 open={snackBar}
