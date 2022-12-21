@@ -18,13 +18,13 @@ function Word(props: PropsType) {
         let output: React.CSSProperties = {};
         switch (mark) {
             case Marks.NOT_HERE:
-                output = { backgroundColor: 'darkgrey' };
+                output = { backgroundColor: '#fcaf58' };
                 break;
             case Marks.EXACT:
-                output = { backgroundColor: 'green', color: 'white' };
+                output = { backgroundColor: '#79a253' };
                 break;
             case Marks.UNMARKED:
-                output = {};
+                output = { backgroundColor: '#312f2f' };
                 break;
         }
 
@@ -66,6 +66,10 @@ function Word(props: PropsType) {
                                 textAlign: 'center',
                                 textTransform: 'uppercase',
                                 cursor: 'pointer',
+                                color: '#ffeedb',
+                                fontWeight: 900,
+                                ...markColor(props.letterStates[col]),
+                                borderRadius: 5,
                             },
                             onKeyUp: (e) => {
                                 if (e.key.length === 1) {
@@ -85,8 +89,6 @@ function Word(props: PropsType) {
                             margin: '0.25rem',
                             width: '3.5rem',
                             height: '3.4rem',
-
-                            ...markColor(props.letterStates[col]),
                         }}
                     />
                 );
