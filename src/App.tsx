@@ -2,7 +2,16 @@ import React, { useEffect } from 'react';
 import './App.css';
 import useSolver, { COLS, Marks } from './hooks/useSolver';
 import Word from './components/word';
-import { TextField } from '@mui/material';
+import {
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableRow,
+    TextField,
+    Typography,
+} from '@mui/material';
 
 function App() {
     const solver = useSolver();
@@ -41,8 +50,12 @@ function App() {
 
     return (
         <div className="App">
-            <div className="content">
-                <div id="words-used">
+            <Paper className="content" elevation={3}>
+                <Typography variant="h4" className="title">
+                    Wordle Solver
+                </Typography>
+
+                <div id="words-used" className="words-used">
                     {solver.wordsUsed.map((word, row) => {
                         return (
                             <Word
@@ -56,16 +69,39 @@ function App() {
                         );
                     })}
                 </div>
-                <form onSubmit={submitHandler} style={{ width: '100%' }}>
-                    <TextField id="word-input" sx={{ width: '100%' }} />
+                <form onSubmit={submitHandler}>
+                    <TextField
+                        id="word-input"
+                        className="word-input"
+                        placeholder="add word"
+                    />
                 </form>
 
-                <div>
-                    {solver.results.map((word, index) => (
-                        <div key={index}>{word}</div>
-                    ))}
-                </div>
-            </div>
+                <Typography className="divider" variant="caption">
+                    {solver.results.length > 0 ? 'results' : 'no results'}
+                </Typography>
+
+                <TableContainer className="results" component={Paper}>
+                    <Table sx={{}} aria-label="simple table">
+                        <TableBody>
+                            {solver.results.map((word, index) => (
+                                <TableRow
+                                    key={index}
+                                    sx={{
+                                        '&:last-child td, &:last-child th': {
+                                            border: 0,
+                                        },
+                                    }}
+                                >
+                                    <TableCell component="th" scope="row">
+                                        {word}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
         </div>
     );
 }

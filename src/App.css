@@ -3,6 +3,35 @@
     justify-content: center;
 }
 
+.title {
+    text-align: center;
+}
+
 .content {
-    display: inline-block;
+    display: grid;
+    justify-content: center;
+    margin: 0.5rem;
+    padding: 1rem;
+}
+
+.words-used {
+    margin-top: 0.5rem;
+}
+
+.content > form {
+    margin: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.word-input {
+    width: 100%;
+}
+
+.divider {
+    padding-left: 1rem;
+}
+
+.results {
+    max-height: 300px;
+    overflow: auto;
 }
