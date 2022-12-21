@@ -92,8 +92,10 @@ function useSolver() {
         const newWordsUsed = [...wordsUsed];
 
         if (row < newWordsUsed.length) {
-            newWordsUsed[row] = newWord;
+            newWordsUsed[row] = newWord.toUpperCase();
         }
+        console.log('update word');
+        setWordsUsed(newWordsUsed);
     };
 
     const updatePositions = () => {

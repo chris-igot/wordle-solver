@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { COLS, Marks } from '../hooks/useSolver';
 import { TextField } from '@mui/material';
 
@@ -13,6 +13,8 @@ export interface PropsType {
 function Word(props: PropsType) {
     const indexStart = (props.row ? COLS * props.row : 0) + 1;
     const textArray = props.word ? props.word.split('') : Array(COLS).fill(' ');
+
+    const [readonly, setReadonly] = useState(true);
 
     const markColor = (mark: Marks): React.CSSProperties => {
         let output: React.CSSProperties = {};
@@ -47,6 +49,7 @@ function Word(props: PropsType) {
 
         wordArr[index] = newValue;
         const newWord = wordArr.join('');
+        console.log({ newWord }, props.row);
         props.updateWord(newWord, props.row);
     };
 
@@ -60,6 +63,7 @@ function Word(props: PropsType) {
                         variant="outlined"
                         inputProps={{
                             id: 'letter-' + (indexStart + col),
+                            readOnly: true,
                             tabIndex: indexStart + col,
                             maxLength: 1,
                             style: {
@@ -68,8 +72,14 @@ function Word(props: PropsType) {
                                 cursor: 'pointer',
                                 color: '#ffeedb',
                                 fontWeight: 900,
-                                ...markColor(props.letterStates[col]),
                                 borderRadius: 5,
+                                ...markColor(props.letterStates[col]),
+                            },
+                            onDoubleClick: (e) => {
+                                setReadonly(false);
+                            },
+                            onBlur: () => {
+                                setReadonly(true);
                             },
                             onKeyUp: (e) => {
                                 if (e.key.length === 1) {
@@ -78,7 +88,9 @@ function Word(props: PropsType) {
                                 }
                             },
                             onFocus: (e) => {
-                                e.target.select();
+                                if (!readonly) {
+                                    e.target.select();
+                                }
                             },
                             onClick: (e) => {
                                 const row = props.row ? props.row : 0;
