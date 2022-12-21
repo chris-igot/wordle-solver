@@ -28,6 +28,9 @@ function Word(props: PropsType) {
             case Marks.NOT_ANYWHERE:
                 output = { backgroundColor: '#312f2f' };
                 break;
+            case Marks.NA:
+                output = { backgroundColor: '#ffeedb', color: '#312f2f' };
+                break;
         }
 
         return output;

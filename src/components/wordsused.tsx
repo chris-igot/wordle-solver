@@ -1,5 +1,5 @@
 import React from 'react';
-import { COLS, Marks } from '../hooks/useSolver';
+import { COLS, Marks, PosDataType } from '../hooks/useSolver';
 import { Box, Divider, List, ListItem, TextField } from '@mui/material';
 import { DeleteForever } from '@mui/icons-material';
 
@@ -8,7 +8,7 @@ export interface PropsType {
         ready: boolean;
         wordsUsed: string[];
         marks: Marks[][];
-        positions: { [index: string]: number | Set<number> };
+        positions: PosDataType;
         reset: () => void;
         markLetter: (mark: Marks, row: number, col: number) => void;
         addWord: (word: string) => void;

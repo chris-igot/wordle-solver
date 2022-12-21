@@ -4,9 +4,10 @@ export const ROWS = 6;
 export const COLS = 5;
 
 export enum Marks {
-    NOT_ANYWHERE,
-    NOT_HERE,
+    NA,
     EXACT,
+    NOT_HERE,
+    NOT_ANYWHERE,
 }
 
 const generate2DArray = (rows: number, cols: number) => {
@@ -19,12 +20,33 @@ const generate2DArray = (rows: number, cols: number) => {
     return output;
 };
 
+function* offGen<T>(index: number, one: T, many: T, count: number) {
+    for (let i = 0; i < count; i++) {
+        if (i === index) {
+            yield one;
+        } else {
+            yield many;
+        }
+    }
+}
+
+function generateArray(
+    index: number,
+    one: Marks = Marks.EXACT,
+    many: Marks = Marks.NOT_ANYWHERE,
+    count: number = COLS
+) {
+    return [...offGen(index, one, many, count)];
+}
+
+export interface PosDataType {
+    [index: string]: false | Marks[];
+}
+
 function useSolver() {
     const [words, setWords] = useState<string[]>([]);
     const [wordsUsed, setWordsUsed] = useState<string[]>([]);
-    const [positions, setPositions] = useState<{
-        [index: string]: number | Set<number>;
-    }>({});
+    const [positions, setPositions] = useState<PosDataType>({});
     const [marks, setMarks] = useState<Marks[][]>(generate2DArray(ROWS, COLS));
     const [ready, setReady] = useState(false);
     const [results, setResults] = useState<string[]>([]);
@@ -92,6 +114,7 @@ function useSolver() {
             newWordsUsed.splice(row, 1);
             setWordsUsed(newWordsUsed);
             resetMarkedRow(row);
+            setPositions({});
         }
 
         return row;
@@ -106,6 +129,7 @@ function useSolver() {
 
         setWordsUsed(newWordsUsed);
         resetMarkedRow(row);
+        setPositions({});
     };
 
     const updatePositions = () => {
@@ -115,26 +139,41 @@ function useSolver() {
             for (let col = 0; col < COLS; col++) {
                 switch (marks[row][col]) {
                     case Marks.EXACT:
-                        newPositions[wordsUsed[row].at(col) as string] = col;
+                        if (
+                            newPositions[
+                                wordsUsed[row].at(col) as string
+                            ] instanceof Array
+                        ) {
+                            (
+                                newPositions[
+                                    wordsUsed[row].at(col) as string
+                                ] as Marks[]
+                            )[col] = Marks.EXACT;
+                        } else {
+                            newPositions[wordsUsed[row].at(col) as string] =
+                                generateArray(col);
+                        }
+
                         break;
                     case Marks.NOT_HERE:
                         if (
                             newPositions[
                                 wordsUsed[row].at(col) as string
-                            ] instanceof Set
+                            ] instanceof Array
                         ) {
                             (
                                 newPositions[
                                     wordsUsed[row].at(col) as string
-                                ] as Set<number>
-                            ).add(col);
+                                ] as Marks[]
+                            )[col] = Marks.NOT_HERE;
                         } else {
                             newPositions[wordsUsed[row].at(col) as string] =
-                                new Set([col]);
+                                generateArray(col, Marks.NOT_HERE);
                         }
+
                         break;
                     case Marks.NOT_ANYWHERE:
-                        newPositions[wordsUsed[row].at(col) as string] = -1;
+                        newPositions[wordsUsed[row].at(col) as string] = false;
                         break;
                     default:
                         break;
@@ -146,57 +185,41 @@ function useSolver() {
     };
 
     const findWords = () => {
-        const matches: string[] = [];
-        if (Object.keys(positions).length > 0) {
-            for (let i = 0; i < words.length; i++) {
-                const word = words[i];
-                let ok = true;
+        const matches = words.filter((word) => {
+            for (const letter in positions) {
+                const posData = positions[letter];
+                const includesLetter = word.includes(letter);
 
-                for (const letter in positions) {
-                    const posData = positions[letter];
+                if (posData === false) {
+                    if (includesLetter) {
+                        return false;
+                    }
+                } else {
+                    if (!includesLetter) {
+                        return false;
+                    }
 
-                    if (typeof posData === 'number') {
-                        if (word.includes(letter)) {
-                            if (posData < 0) {
-                                ok = false;
-                                break;
-                            } else {
-                                if (word.at(posData) !== letter) {
-                                    ok = false;
-                                    break;
+                    for (let mIndex = 0; mIndex < posData.length; mIndex++) {
+                        switch (posData[mIndex]) {
+                            case Marks.EXACT:
+                                if (word.at(mIndex) !== letter) {
+                                    return false;
                                 }
-                            }
-                        } else {
-                            if (posData >= 0) {
-                                ok = false;
                                 break;
-                            }
-                        }
-                    } else {
-                        for (const index of posData) {
-                            if (word.at(index) === letter) {
-                                ok = false;
+                            case Marks.NOT_HERE:
+                                if (word.at(mIndex) === letter) {
+                                    return false;
+                                }
                                 break;
-                            }
-
-                            if (!word.includes(letter)) {
-                                ok = false;
+                            default:
                                 break;
-                            }
-                        }
-
-                        if (!ok) {
-                            ok = false;
-                            break;
                         }
                     }
                 }
-
-                if (ok) {
-                    matches.push(word);
-                }
             }
-        }
+
+            return true;
+        });
 
         setResults(matches);
         return matches;
