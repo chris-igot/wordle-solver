@@ -227,6 +227,7 @@ function useSolver() {
 
     return {
         ready,
+        wordOptions: words.map((label) => ({ label })),
         wordsUsed,
         marks,
         positions,

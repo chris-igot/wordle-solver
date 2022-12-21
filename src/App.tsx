@@ -3,6 +3,7 @@ import './App.css';
 import useSolver, { COLS, Marks } from './hooks/useSolver';
 import Word from './components/word';
 import {
+    Autocomplete,
     Box,
     Button,
     ButtonGroup,
@@ -122,55 +123,68 @@ function App() {
                     )}
 
                     <Collapse in={!edit}>
-                        <form onSubmit={submitHandler}>
-                            <TextField
+                        <form onSubmit={submitHandler} autoComplete="off">
+                            <Autocomplete
                                 id="word-input"
-                                className="word-input"
-                                placeholder="add word"
-                                inputProps={{
-                                    maxLength: COLS,
-                                    style: {
-                                        textAlign: 'center',
-                                        fontWeight: 900,
-                                        textTransform: 'uppercase',
-                                    },
-                                }}
+                                key={solver.wordsUsed.length}
+                                options={solver.wordOptions.filter(
+                                    (word) =>
+                                        !solver.wordsUsed.includes(word.label)
+                                )}
+                                freeSolo={true}
+                                renderInput={({ inputProps, ...params }) => (
+                                    <TextField
+                                        className="word-input"
+                                        placeholder="add word"
+                                        inputProps={{
+                                            ...inputProps,
+                                            maxLength: COLS,
+                                            style: {
+                                                textAlign: 'center',
+                                                fontWeight: 900,
+                                                textTransform: 'uppercase',
+                                            },
+                                        }}
+                                        {...params}
+                                    />
+                                )}
                             />
                         </form>
 
-                        <Typography className="divider" variant="caption">
-                            {solver.results.length > 0
-                                ? 'results'
-                                : 'no results'}
-                        </Typography>
-
-                        <Box className="results">
-                            <List>
-                                {solver.results.length > 0 && <Divider />}
-                                <TransitionGroup>
-                                    {solver.results
-                                        .slice(0, 20)
-                                        .map((word, index) => (
-                                            <Collapse key={index}>
-                                                <ListItem>
-                                                    <ListItemText
-                                                        primary={word}
-                                                    />
-                                                </ListItem>
-                                                <Divider />
-                                            </Collapse>
-                                        ))}
-                                </TransitionGroup>
-                                {solver.results.length > 20 && (
-                                    <Typography
-                                        className="divider"
-                                        variant="caption"
-                                    >
-                                        maximum of 20 results shown
-                                    </Typography>
-                                )}
-                            </List>
-                        </Box>
+                        <Collapse in={solver.wordsUsed.length > 0}>
+                            <Typography className="divider" variant="caption">
+                                {solver.results.length > 0
+                                    ? 'results'
+                                    : 'no results'}
+                            </Typography>
+                            <Box className="results">
+                                <List>
+                                    {solver.results.length > 0 && <Divider />}
+                                    <TransitionGroup>
+                                        {solver.results
+                                            .slice(0, 20)
+                                            .map((word, index) => (
+                                                <Collapse key={index}>
+                                                    <ListItem>
+                                                        <ListItemText
+                                                            primary={word}
+                                                        />
+                                                    </ListItem>
+                                                    <Divider />
+                                                </Collapse>
+                                            ))}
+                                    </TransitionGroup>
+                                    {solver.results.length > 20 && (
+                                        <Typography
+                                            className="divider"
+                                            variant="caption"
+                                        >
+                                            maximum of 20 results shown
+                                        </Typography>
+                                    )}
+                                </List>
+                            </Box>
+                        </Collapse>
                     </Collapse>
                 </Paper>
             </Grow>
