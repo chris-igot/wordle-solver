@@ -14,16 +14,11 @@ import {
     ListItemText,
     Paper,
     Snackbar,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableRow,
     TextField,
     Typography,
 } from '@mui/material';
-import { DeleteForever } from '@mui/icons-material';
 import { TransitionGroup } from 'react-transition-group';
+import WordsUsed from './components/wordsused';
 
 function App() {
     const solver = useSolver();
@@ -78,56 +73,10 @@ function App() {
                     </Typography>
 
                     <Collapse in={edit}>
-                        <Box>
-                            <List>
-                                <Divider />
-                                {solver.wordsUsed.map((word, row) => (
-                                    <React.Fragment key={row}>
-                                        <ListItem>
-                                            <TextField
-                                                defaultValue={word}
-                                                inputProps={{
-                                                    maxLength: COLS,
-                                                    onKeyUp: (e) => {
-                                                        const newWord =
-                                                            e.currentTarget.value.toUpperCase();
-
-                                                        if (
-                                                            e.key === 'Enter' &&
-                                                            newWord.length ===
-                                                                COLS
-                                                        ) {
-                                                            solver.updateWord(
-                                                                newWord,
-                                                                row
-                                                            );
-
-                                                            activateSnakeBar(
-                                                                `${word} has been changed to ${newWord}`
-                                                            );
-                                                            e.currentTarget.value =
-                                                                newWord;
-                                                        }
-                                                    },
-                                                }}
-                                            />
-
-                                            <DeleteForever
-                                                color="error"
-                                                onClick={() => {
-                                                    solver.removeWord(word);
-                                                }}
-                                                sx={{
-                                                    marginInlineStart: '1rem',
-                                                    float: 'right',
-                                                }}
-                                            />
-                                        </ListItem>
-                                        <Divider />
-                                    </React.Fragment>
-                                ))}
-                            </List>
-                        </Box>
+                        <WordsUsed
+                            solver={solver}
+                            activateSnakeBar={activateSnakeBar}
+                        />
                     </Collapse>
 
                     <Collapse in={!edit}>
