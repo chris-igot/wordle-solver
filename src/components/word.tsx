@@ -25,7 +25,7 @@ function Word(props: PropsType) {
             case Marks.EXACT:
                 output = { backgroundColor: '#79a253' };
                 break;
-            case Marks.UNMARKED:
+            case Marks.NOT_ANYWHERE:
                 output = { backgroundColor: '#312f2f' };
                 break;
         }

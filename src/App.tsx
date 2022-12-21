@@ -34,14 +34,14 @@ function App() {
 
     const toggle = (row: number, col: number) => {
         switch (solver.marks[row][col]) {
-            case Marks.UNMARKED:
+            case Marks.NOT_ANYWHERE:
                 solver.markLetter(Marks.NOT_HERE, row, col);
                 break;
             case Marks.NOT_HERE:
                 solver.markLetter(Marks.EXACT, row, col);
                 break;
             case Marks.EXACT:
-                solver.markLetter(Marks.UNMARKED, row, col);
+                solver.markLetter(Marks.NOT_ANYWHERE, row, col);
                 break;
         }
     };

@@ -4,7 +4,7 @@ export const ROWS = 6;
 export const COLS = 5;
 
 export enum Marks {
-    UNMARKED,
+    NOT_ANYWHERE,
     NOT_HERE,
     EXACT,
 }
@@ -13,7 +13,7 @@ const generate2DArray = (rows: number, cols: number) => {
     const output: Marks[][] = [];
 
     for (let row = 0; row < rows; row++) {
-        output.push(Array(5).fill(Marks.UNMARKED));
+        output.push(Array(cols).fill(Marks.NOT_ANYWHERE));
     }
 
     return output;
@@ -68,6 +68,14 @@ function useSolver() {
         setMarks(newMarks);
     };
 
+    const resetMarkedRow = (row: number) => {
+        const newMarks = { ...marks };
+
+        newMarks[row] = Array(COLS).fill(Marks.NOT_ANYWHERE);
+
+        setMarks(newMarks);
+    };
+
     const addWord = (word: string) => {
         const newWordsUsed = [...wordsUsed];
 
@@ -83,6 +91,7 @@ function useSolver() {
 
             newWordsUsed.splice(row, 1);
             setWordsUsed(newWordsUsed);
+            resetMarkedRow(row);
         }
 
         return row;
@@ -96,6 +105,7 @@ function useSolver() {
         }
 
         setWordsUsed(newWordsUsed);
+        resetMarkedRow(row);
     };
 
     const updatePositions = () => {
@@ -123,7 +133,7 @@ function useSolver() {
                                 new Set([col]);
                         }
                         break;
-                    case Marks.UNMARKED:
+                    case Marks.NOT_ANYWHERE:
                         newPositions[wordsUsed[row].at(col) as string] = -1;
                         break;
                     default:
