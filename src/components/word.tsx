@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { COLS, Marks } from '../hooks/useSolver';
-import { TextField, TextFieldPropsColorOverrides } from '@mui/material';
+import { TextField } from '@mui/material';
 
 export interface PropsType {
     row: number;

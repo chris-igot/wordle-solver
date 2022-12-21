@@ -14,9 +14,6 @@ const generate2DArray = (rows: number, cols: number) => {
 
     for (let row = 0; row < rows; row++) {
         output.push(Array(5).fill(Marks.UNMARKED));
-        // for (let col = 0; col < cols; col++) {
-
-        // }
     }
 
     return output;
@@ -45,7 +42,7 @@ function useSolver() {
 
                     words.push(word);
                 }
-
+                console.log(words);
                 setReady(true);
                 setWords(words);
             })
@@ -64,7 +61,7 @@ function useSolver() {
 
     const markLetter = (mark: Marks, row: number, col: number) => {
         const newMarks = { ...marks };
-
+        console.log('markLetter', { mark, row, col });
         newMarks[row][col] = mark;
 
         setMarks(newMarks);
@@ -74,7 +71,7 @@ function useSolver() {
     const addWord = (word: string) => {
         const newWordsUsed = [...wordsUsed];
 
-        newWordsUsed.push(word);
+        newWordsUsed.push(word.toUpperCase());
         setWordsUsed(newWordsUsed);
         updatePositions();
     };
@@ -112,7 +109,11 @@ function useSolver() {
                         break;
                     case Marks.NOT_HERE:
                         // console.log('99', wordsUsed[row], col);
-                        if (newPositions[wordsUsed[row].at(col) as string]) {
+                        if (
+                            newPositions[
+                                wordsUsed[row].at(col) as string
+                            ] instanceof Set
+                        ) {
                             (
                                 newPositions[
                                     wordsUsed[row].at(col) as string
@@ -124,7 +125,8 @@ function useSolver() {
                         }
                         break;
                     case Marks.UNMARKED:
-                        delete newPositions[wordsUsed[row].at(col) as string];
+                        // delete newPositions[wordsUsed[row].at(col) as string];
+                        newPositions[wordsUsed[row].at(col) as string] = -1;
                         break;
                     default:
                         break;
@@ -137,41 +139,63 @@ function useSolver() {
 
     const findWords = () => {
         const matches: string[] = [];
-
+        console.log('\n\n');
         if (Object.keys(positions).length > 0) {
-            for (let row = 0; row < words.length; row++) {
-                const word = words[row];
-                let found = true;
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                let ok = true;
 
-                for (let col = 0; col < COLS; col++) {
-                    const letter = word.at(col) as string;
+                for (const letter in positions) {
+                    const posData = positions[letter];
 
-                    if (letter in positions) {
-                        const posData = positions[letter];
-
-                        if (typeof posData === 'number') {
-                            if (posData !== col) {
-                                found = false;
+                    if (typeof posData === 'number') {
+                        if (word.includes(letter)) {
+                            if (posData < 0) {
+                                ok = false;
                                 break;
+                            } else {
+                                if (word.at(posData) !== letter) {
+                                    ok = false;
+                                    break;
+                                }
                             }
                         } else {
-                            if (posData.has(col)) {
-                                found = false;
+                            if (posData >= 0) {
+                                ok = false;
                                 break;
                             }
                         }
                     } else {
-                        found = false;
-                        break;
+                        for (const index of posData) {
+                            if (word.at(index) === letter) {
+                                ok = false;
+                                break;
+                            }
+
+                            if (!word.includes(letter)) {
+                                ok = false;
+                                break;
+                            }
+                        }
+
+                        if (!ok) {
+                            ok = false;
+                            break;
+                        }
                     }
                 }
 
-                if (found) {
+                if (ok) {
                     matches.push(word);
                 }
             }
         }
-        console.log(matches, Object.keys(positions).length);
+        console.log(
+            matches,
+            Object.keys(positions).length,
+            wordsUsed,
+            positions
+        );
         return matches;
     };
 
