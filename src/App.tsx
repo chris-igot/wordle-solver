@@ -10,6 +10,7 @@ import {
     List,
     ListItem,
     Paper,
+    Snackbar,
     Table,
     TableBody,
     TableCell,
@@ -24,6 +25,8 @@ function App() {
     const solver = useSolver();
 
     const [edit, setEdit] = useState(false);
+    const [snackBar, setSnackBar] = useState(false);
+    const [snackBarMessage, setSnackBarMessage] = useState('');
 
     useEffect(() => {
         solver.findWords();
@@ -57,6 +60,11 @@ function App() {
         }
     };
 
+    const activateSnakeBar = (message: string) => {
+        setSnackBarMessage(message);
+        setSnackBar(true);
+    };
+
     return (
         <div className="App">
             <Paper className="content" elevation={3}>
@@ -76,17 +84,23 @@ function App() {
                                             inputProps={{
                                                 maxLength: COLS,
                                                 onKeyUp: (e) => {
-                                                    const word =
-                                                        e.currentTarget.value;
+                                                    const newWord =
+                                                        e.currentTarget.value.toUpperCase();
 
                                                     if (
                                                         e.key === 'Enter' &&
-                                                        word.length === COLS
+                                                        newWord.length === COLS
                                                     ) {
                                                         solver.updateWord(
-                                                            word,
+                                                            newWord,
                                                             row
                                                         );
+
+                                                        activateSnakeBar(
+                                                            `${word} has been changed to ${newWord}`
+                                                        );
+                                                        e.currentTarget.value =
+                                                            newWord;
                                                     }
                                                 },
                                             }}
@@ -177,6 +191,16 @@ function App() {
                     </Table>
                 </TableContainer>
             </Paper>
+
+            <Snackbar
+                open={snackBar}
+                autoHideDuration={3000}
+                message={snackBarMessage}
+                onClose={() => {
+                    setSnackBar(false);
+                    setSnackBarMessage('');
+                }}
+            />
         </div>
     );
 }
