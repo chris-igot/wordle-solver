@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import './App.css';
 import useSolver, { COLS, Marks } from './hooks/useSolver';
 import Word from './components/word';
 import { TextField } from '@mui/material';
@@ -40,7 +41,7 @@ function App() {
 
     return (
         <div className="App">
-            <div>
+            <div className="content">
                 <div id="words-used">
                     {solver.wordsUsed.map((word, row) => {
                         return (
@@ -55,8 +56,8 @@ function App() {
                         );
                     })}
                 </div>
-                <form onSubmit={submitHandler}>
-                    <TextField id="word-input" />
+                <form onSubmit={submitHandler} style={{ width: '100%' }}>
+                    <TextField id="word-input" sx={{ width: '100%' }} />
                 </form>
 
                 <div>
