@@ -68,7 +68,6 @@ function Word(props: PropsType) {
                                 cursor: 'pointer',
                             },
                             onKeyUp: (e) => {
-                                console.log(e.key);
                                 if (e.key.length === 1) {
                                     updateLetter(e.key, col);
                                     focusNext(indexStart + col + 1);

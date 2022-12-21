@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const ROWS = 6;
 export const COLS = 5;
@@ -34,7 +34,6 @@ function useSolver() {
                 return response.text();
             })
             .then((data) => {
-                console.log('data', data.length);
                 let words: string[] = [];
 
                 for (let i = 0; i < data.length; i += 6) {
@@ -42,16 +41,12 @@ function useSolver() {
 
                     words.push(word);
                 }
-                console.log(words);
+
                 setReady(true);
                 setWords(words);
             })
             .catch((err) => console.log(err));
     }, []);
-
-    useEffect(() => {
-        console.log(positions);
-    }, [positions]);
 
     const reset = () => {
         setMarks(generate2DArray(ROWS, COLS));
@@ -61,7 +56,7 @@ function useSolver() {
 
     const markLetter = (mark: Marks, row: number, col: number) => {
         const newMarks = { ...marks };
-        console.log('markLetter', { mark, row, col });
+
         newMarks[row][col] = mark;
 
         setMarks(newMarks);
@@ -108,7 +103,6 @@ function useSolver() {
                         newPositions[wordsUsed[row].at(col) as string] = col;
                         break;
                     case Marks.NOT_HERE:
-                        // console.log('99', wordsUsed[row], col);
                         if (
                             newPositions[
                                 wordsUsed[row].at(col) as string
@@ -125,7 +119,6 @@ function useSolver() {
                         }
                         break;
                     case Marks.UNMARKED:
-                        // delete newPositions[wordsUsed[row].at(col) as string];
                         newPositions[wordsUsed[row].at(col) as string] = -1;
                         break;
                     default:
@@ -139,7 +132,6 @@ function useSolver() {
 
     const findWords = () => {
         const matches: string[] = [];
-        console.log('\n\n');
         if (Object.keys(positions).length > 0) {
             for (let i = 0; i < words.length; i++) {
                 const word = words[i];
@@ -190,12 +182,7 @@ function useSolver() {
                 }
             }
         }
-        console.log(
-            matches,
-            Object.keys(positions).length,
-            wordsUsed,
-            positions
-        );
+
         return matches;
     };
 

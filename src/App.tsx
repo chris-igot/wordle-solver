@@ -1,15 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import useSolver, { COLS, Marks } from './hooks/useSolver';
 import Word from './components/word';
 import { TextField } from '@mui/material';
 
 function App() {
     const solver = useSolver();
-    // const solver = useRef(new Solver('./dictionary.txt'));
-
-    useEffect(() => {
-        // solver.current.loadDictionary();
-    }, []);
 
     const toggle = (row: number, col: number) => {
         switch (solver.marks[row][col]) {
