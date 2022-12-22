@@ -10,6 +10,24 @@ export enum Marks {
     NOT_ANYWHERE,
 }
 
+function indexOfAll(text: string, substring: string) {
+    let index = text.indexOf(substring, 0);
+    let results = [];
+
+    if (index >= 0) {
+        results.push(index++);
+    }
+
+    while (index > 0) {
+        index = text.indexOf(substring, index);
+        if (index >= 0) {
+            results.push(index++);
+        }
+    }
+
+    return results;
+}
+
 const generate2DArray = (rows: number, cols: number) => {
     const output: Marks[][] = [];
 
@@ -76,6 +94,11 @@ function useSolver() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [marks, wordsUsed]);
 
+    useEffect(() => {
+        console.table(positions);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [positions]);
+
     const reset = () => {
         setMarks(generate2DArray(ROWS, COLS));
         setWordsUsed([]);
@@ -84,6 +107,27 @@ function useSolver() {
 
     const markLetter = (mark: Marks, row: number, col: number) => {
         const newMarks = { ...marks };
+        const letter = wordsUsed[row].at(col) as string;
+        const indices = indexOfAll(wordsUsed[row], letter);
+
+        if (indices.length > 1) {
+            for (let i = 0; i < indices.length; i++) {
+                const c = indices[i];
+
+                if (c !== col) {
+                    if (
+                        mark !== Marks.NOT_ANYWHERE &&
+                        newMarks[row][c] !== Marks.EXACT
+                    ) {
+                        newMarks[row][c] = Marks.NOT_HERE;
+                    }
+
+                    if (mark === Marks.NOT_ANYWHERE) {
+                        newMarks[row][c] = Marks.NOT_ANYWHERE;
+                    }
+                }
+            }
+        }
 
         newMarks[row][col] = mark;
 
@@ -137,50 +181,47 @@ function useSolver() {
 
         for (let row = 0; row < wordsUsed.length; row++) {
             for (let col = 0; col < COLS; col++) {
+                const isArray = Array.isArray(
+                    newPositions[wordsUsed[row].at(col) as string]
+                );
+
+                console.log(
+                    `marks[${row}][${col}]`,
+                    marks[row][col],
+                    wordsUsed[row].at(col),
+                    newPositions[wordsUsed[row].at(col) as string],
+                    isArray
+                );
+
                 switch (marks[row][col]) {
                     case Marks.EXACT:
-                        if (
-                            newPositions[
-                                wordsUsed[row].at(col) as string
-                            ] instanceof Array
-                        ) {
-                            (
-                                newPositions[
-                                    wordsUsed[row].at(col) as string
-                                ] as Marks[]
-                            )[col] = Marks.EXACT;
-                        } else {
-                            newPositions[wordsUsed[row].at(col) as string] =
-                                generateArray(col);
-                        }
-
-                        break;
                     case Marks.NOT_HERE:
-                        if (
-                            newPositions[
-                                wordsUsed[row].at(col) as string
-                            ] instanceof Array
-                        ) {
+                        console.log('NOT_HERE');
+                        if (isArray) {
+                            console.log('---change array');
                             (
                                 newPositions[
                                     wordsUsed[row].at(col) as string
                                 ] as Marks[]
-                            )[col] = Marks.NOT_HERE;
+                            )[col] = marks[row][col];
                         } else {
+                            console.log('---new array');
                             newPositions[wordsUsed[row].at(col) as string] =
-                                generateArray(col, Marks.NOT_HERE);
+                                generateArray(col, marks[row][col]);
                         }
 
                         break;
                     case Marks.NOT_ANYWHERE:
+                        console.log('NOT_ANYWHERE');
                         newPositions[wordsUsed[row].at(col) as string] = false;
                         break;
                     default:
+                        console.log('---default');
                         break;
                 }
             }
         }
-
+        console.table(newPositions);
         setPositions(newPositions);
     };
 
